@@ -1,37 +1,100 @@
 #include <LiquidCrystal.h>// include the library code
 #include <IRremote.h> 
+#include <Servo.h> 
 /**********************************************************/
+/***Declare Global variables***/
 char array1[] = " Good Morning               "; //the string to print on the LCD
 char array2[] = "Yumi the Havanese             "; //the string to print on the LCD
 String input = "";     // Temp string array 
 int tim = 500;  //the value of delay time
-int receiver_pin = 8; 
-// initialize the library with the numbers of the interface pins
+int servoPin = 3;
 
+bool set_breakfast = false;
+bool set_lunch = false;
+bool set_dinner = false; 
+
+bool breakfast_done = false;
+bool lunch_done = false; 
+bool dinner_done = false;
+
+String breakfast_time = ""; 
+String lunch_time = ""; 
+String dinner_time = ""; 
+
+String val;
+String result; 
+
+Servo servo; 
+
+int servoAngle = 0; 
+int receiver_pin = 8; 
+
+
+/**********************************************************/
+// initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(4, 6, 10, 11, 12, 13);
 /*********************************************************/
 void setup()
 {
   Serial.begin(9600);
+  servo.attach(servoPin);
   IrReceiver.begin(receiver_pin);
 
   lcd.begin(16, 2);  // set up the LCD's number of columns and rows:
 }
 /*********************************************************/
 void loop()
-{
-  lcd.setCursor(0,0);
-  lcd.print("Yumi's Feeder");
-  if (IrReceiver.decode())
-  {
-    if (IrReceiver.decodedIRData.decodedRawData == 4077715200) {
-      input += "1";
-      lcd.setCursor(0,1);
-      lcd.print(input);
+{ 
+  if (set_breakfast == false || set_lunch == false || set_dinner == false) {
+    if (set_breakfast == false) {
+      lcd.setCursor(0,0);
+      lcd.print("Breakfast Time:");
+      delay(1000);
+      set_breakfast = true;
+      lcd.clear(); 
+      while (breakfast_time.length() != 4) {
+        if (IrReceiver.decode()) {
+          val = decodeSignal(IrReceiver.decodedIRData.decodedRawData);
+          IrReceiver.resume();
+          breakfast_time += val;
+          lcd.print(breakfast_time); 
+        }
+      }
+        
     }
-  Serial.println(IrReceiver.decodedIRData.decodedRawData);
-  IrReceiver.resume();
+    else if (set_lunch == false) {
+      lcd.setCursor(0,0);
+      lcd.print("Lunch Time:");
+      delay(1000);
+      set_lunch = true;
+      lcd.clear();
+    }
+    else {
+      lcd.setCursor(0,0);
+      lcd.print("Dinner Time:");
+      delay(1000);
+      set_dinner = true;
+      lcd.clear(); 
+    }
   }
+  else  {
+    lcd.setCursor(0,0);
+    lcd.print("Starting now!");
+  }
+}
+
+/***Decoding IRremote helper function***/
+String decodeSignal(int ir_data) {
+  switch(ir_data)
+  {
+    case 4077715200:
+      result = "1";
+      break;    
+  }
+  return result;
+ 
+}
+
 
 
 // Code for LC1602 Display that will display from left to right
@@ -51,5 +114,4 @@ void loop()
 //    delay(tim);  //wait for 250 ms
 //  }
 //  lcd.clear();  //Clears the LCD screen and positions the cursor in the upper-left corner.
-}
 /************************************************************/
