@@ -21,7 +21,9 @@ String breakfast_time = "";
 String lunch_time = ""; 
 String dinner_time = ""; 
 
-String val;
+bool done = false; 
+
+
 String result; 
 
 Servo servo; 
@@ -51,18 +53,29 @@ void loop()
       lcd.print("Breakfast Time:");
       delay(1000);
       set_breakfast = true;
-      lcd.clear(); 
-      while (breakfast_time.length() != 4) {
-        if (IrReceiver.decode()) {
-          val = decodeSignal(IrReceiver.decodedIRData.decodedRawData);
-          IrReceiver.resume();
-          breakfast_time += val;
-          lcd.print(breakfast_time); 
-        }
+      lcd.clear();
+      uint32_t val;
+      while (val != 4061003520) {
+         if (IrReceiver.decode()) {
+          val = IrReceiver.decodedIRData.decodedRawData; 
+          Serial.print(val);
+          if (val == 3141861120) {
+            breakfast_time.remove(breakfast_time.length() - 1);    
+          }
+          else {
+            delay(500);
+            breakfast_time = decodeSignal(val);
+            array1.insert(breakfast_time);
+            lcd.print(breakfast_time);
+            Serial.print(breakfast_time);   
+          }
+         
+         }
       }
         
     }
     else if (set_lunch == false) {
+      Serial.print(breakfast_time);
       lcd.setCursor(0,0);
       lcd.print("Lunch Time:");
       delay(1000);
@@ -84,13 +97,47 @@ void loop()
 }
 
 /***Decoding IRremote helper function***/
-String decodeSignal(int ir_data) {
+String decodeSignal(uint32_t ir_data) {
   switch(ir_data)
   {
+    case 3910598400:
+      result = "0";
+      break;
     case 4077715200:
       result = "1";
-      break;    
+      break; 
+    case 3877175040:
+      result = "2";
+      break;
+    case 2707357440:
+      result = "3";
+      break;
+    case 4144561920:
+      result = "4";
+      break;
+    case 3810328320:
+      result = "5";
+      break;
+    case 2774204160:
+      result = "6";
+      break;
+    case 3175284480:
+      result = "7";
+      break;
+    case 2907897600:
+      result = "8";
+      break;
+    case 3041591040:
+      result = "9";
+      break;
+    case 4061003520:
+      result = "STOP";
+      break;
   }
+
+  IrReceiver.resume();
+ 
+  
   return result;
  
 }
