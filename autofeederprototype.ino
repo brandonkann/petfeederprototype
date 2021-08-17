@@ -1,4 +1,4 @@
-#include <LiquidCrystal.h>// include the library code
+                                       #include <LiquidCrystal.h>// include the library code
 #include <IRremote.h> 
 #include <Servo.h> 
 /**********************************************************/
@@ -60,34 +60,77 @@ void loop()
           val = IrReceiver.decodedIRData.decodedRawData; 
           Serial.print(val);
           if (val == 3141861120) {
-            breakfast_time.remove(breakfast_time.length() - 1);    
+            lcd.clear();
+            set_breakfast = false;   
+            val = 0;
+            break;
           }
           else {
-            delay(500);
+            delay(1000);
             breakfast_time = decodeSignal(val);
-            array1.insert(breakfast_time);
             lcd.print(breakfast_time);
             Serial.print(breakfast_time);   
           }
          
          }
       }
-        
     }
     else if (set_lunch == false) {
-      Serial.print(breakfast_time);
       lcd.setCursor(0,0);
       lcd.print("Lunch Time:");
       delay(1000);
       set_lunch = true;
       lcd.clear();
+       uint32_t val;
+      while (val != 4061003520) {
+         if (IrReceiver.decode()) {
+          val = IrReceiver.decodedIRData.decodedRawData; 
+          Serial.print(val);
+          if (val == 3141861120) {
+            lcd.clear();
+            set_lunch = false;   
+            val = 0;
+            break;
+         
+          }
+          else {
+            delay(1000);
+            lunch_time = decodeSignal(val);
+            lcd.print(lunch_time);
+            Serial.print(lunch_time);   
+          }
+         
+         }
+      }
     }
+    
     else {
       lcd.setCursor(0,0);
       lcd.print("Dinner Time:");
       delay(1000);
       set_dinner = true;
       lcd.clear(); 
+      uint32_t val;
+      while (val != 4061003520) {
+         if (IrReceiver.decode()) {
+          val = IrReceiver.decodedIRData.decodedRawData; 
+          Serial.print(val);
+          if (val == 3141861120) {
+            lcd.clear();
+            set_dinner = false;   
+            val = 0;
+            break;
+         
+          }
+          else {
+            delay(1000);
+            dinner_time = decodeSignal(val);
+            lcd.print(dinner_time);
+            Serial.print(dinner_time);   
+          }
+         
+         }
+      }
     }
   }
   else  {
@@ -132,6 +175,15 @@ String decodeSignal(uint32_t ir_data) {
       break;
     case 4061003520:
       result = "STOP";
+      break;
+    case 3860463360:
+      result = ":";
+      break;
+    case 4161273600:
+      result = "am";
+      break;
+    case 4127850240:
+      result = "pm";
       break;
   }
 
