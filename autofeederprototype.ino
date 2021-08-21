@@ -1,4 +1,4 @@
-                                       #include <LiquidCrystal.h>// include the library code
+#include <LiquidCrystal.h>// include the library code
 #include <IRremote.h> 
 #include <Servo.h> 
 /**********************************************************/
@@ -13,16 +13,29 @@ bool set_breakfast = false;
 bool set_lunch = false;
 bool set_dinner = false; 
 
-bool breakfast_done = false;
-bool lunch_done = false; 
-bool dinner_done = false;
-
 String breakfast_time = ""; 
 String lunch_time = ""; 
 String dinner_time = ""; 
 
-bool done = false; 
+String breakfast_final = "";  
+String lunch_final = "";
+String dinner_final = ""; 
 
+// initial Time Display 
+int h = 12;
+int m = 59;
+int s = 45;
+int flag = 1; //PM 
+
+// Time Set Buttons:
+int button1;
+int button2;
+
+// Pin definitions for Time Set Buttons:
+int hs=0; //pin 0 for Hour Setting
+int ms=1; //pin 1 for Minute Setting
+
+static uint32_t last_time, now = 0; // RTC
 
 String result; 
 
@@ -41,6 +54,8 @@ void setup()
   Serial.begin(9600);
   servo.attach(servoPin);
   IrReceiver.begin(receiver_pin);
+  pinMode(hs, INPUT_PULLUP); // avoid external Pullup resistors for Button 1; 
+  pinMode(ms, INPUT_PULLUP); // and Button 2; 
 
   lcd.begin(16, 2);  // set up the LCD's number of columns and rows:
 }
@@ -58,7 +73,6 @@ void loop()
       while (val != 4061003520) {
          if (IrReceiver.decode()) {
           val = IrReceiver.decodedIRData.decodedRawData; 
-          Serial.print(val);
           if (val == 3141861120) {
             lcd.clear();
             set_breakfast = false;   
@@ -69,7 +83,8 @@ void loop()
             delay(1000);
             breakfast_time = decodeSignal(val);
             lcd.print(breakfast_time);
-            Serial.print(breakfast_time);   
+            breakfast_final.concat(breakfast_time);
+            Serial.print(breakfast_final);   
           }
          
          }
@@ -85,18 +100,17 @@ void loop()
       while (val != 4061003520) {
          if (IrReceiver.decode()) {
           val = IrReceiver.decodedIRData.decodedRawData; 
-          Serial.print(val);
           if (val == 3141861120) {
             lcd.clear();
             set_lunch = false;   
             val = 0;
             break;
-         
           }
           else {
             delay(1000);
             lunch_time = decodeSignal(val);
             lcd.print(lunch_time);
+            lunch_final.concat(lunch_time);
             Serial.print(lunch_time);   
           }
          
@@ -114,7 +128,6 @@ void loop()
       while (val != 4061003520) {
          if (IrReceiver.decode()) {
           val = IrReceiver.decodedIRData.decodedRawData; 
-          Serial.print(val);
           if (val == 3141861120) {
             lcd.clear();
             set_dinner = false;   
@@ -126,6 +139,7 @@ void loop()
             delay(1000);
             dinner_time = decodeSignal(val);
             lcd.print(dinner_time);
+            dinner_final.concat(dinner_time);
             Serial.print(dinner_time);   
           }
          
