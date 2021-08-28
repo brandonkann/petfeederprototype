@@ -8,6 +8,7 @@ char array2[] = "Yumi the Havanese             "; //the string to print on the L
 String input = "";     // Temp string array 
 int tim = 500;  //the value of delay time
 int servoPin = 3;
+bool feedingDone = false; 
 
 bool set_breakfast = false;
 bool set_lunch = false;
@@ -21,21 +22,19 @@ String breakfast_final = "";
 String lunch_final = "";
 String dinner_final = ""; 
 
-// initial Time Display 
-int h = 12;
-int m = 59;
-int s = 45;
-int flag = 1; //PM 
+int hour = 12;
+int minutes = 0;
+int seconds = 0;
+int decBtn = 10;
+int hrUp = 9;
+int hrDwn = 8;
+int minUp = 7;
+int minDwn = 6;
+int hrUpDec = 0;
+int hrDwnDec = 0;
+int minUpDec = 0;
+int minDwnDec = 0;
 
-// Time Set Buttons:
-int button1;
-int button2;
-
-// Pin definitions for Time Set Buttons:
-int hs=0; //pin 0 for Hour Setting
-int ms=1; //pin 1 for Minute Setting
-
-static uint32_t last_time, now = 0; // RTC
 
 String result; 
 
@@ -54,8 +53,6 @@ void setup()
   Serial.begin(9600);
   servo.attach(servoPin);
   IrReceiver.begin(receiver_pin);
-  pinMode(hs, INPUT_PULLUP); // avoid external Pullup resistors for Button 1; 
-  pinMode(ms, INPUT_PULLUP); // and Button 2; 
 
   lcd.begin(16, 2);  // set up the LCD's number of columns and rows:
 }
@@ -66,7 +63,7 @@ void loop()
     if (set_breakfast == false) {
       lcd.setCursor(0,0);
       lcd.print("Breakfast Time:");
-      delay(1000);
+      delay(500);
       set_breakfast = true;
       lcd.clear();
       uint32_t val;
@@ -93,7 +90,7 @@ void loop()
     else if (set_lunch == false) {
       lcd.setCursor(0,0);
       lcd.print("Lunch Time:");
-      delay(1000);
+      delay(500);
       set_lunch = true;
       lcd.clear();
        uint32_t val;
@@ -121,10 +118,10 @@ void loop()
     else {
       lcd.setCursor(0,0);
       lcd.print("Dinner Time:");
-      delay(1000);
+      delay(500);
       set_dinner = true;
       lcd.clear(); 
-      uint32_t val;
+      uint32_t val = 0;
       while (val != 4061003520) {
          if (IrReceiver.decode()) {
           val = IrReceiver.decodedIRData.decodedRawData; 
@@ -149,8 +146,20 @@ void loop()
   }
   else  {
     lcd.setCursor(0,0);
-    lcd.print("Starting now!");
+    beginClock(breakfast_final, lunch_final, dinner_final); 
   }
+}
+
+void beginClock(String breakfast, String lunch, String dinner) {
+  breakfast.remove(5);
+  lunch.remove(5);
+  dinner.remove(5);
+  
+  while(feedingDone == false) {
+      
+  }
+  
+ 
 }
 
 /***Decoding IRremote helper function***/
